@@ -31,3 +31,4 @@
 -- WHERE username = 'Isaac';
 
 SELECT * FROM users;
+SELECT * FROM users2;
