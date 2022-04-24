@@ -60,11 +60,8 @@ class CardGame(Card):
         CardGame.SwitchTurn(playerLst)
         playerLst.remove(player)
 
-
-
     @staticmethod
     def PlayerWon(player):
         print(f"{player} won! Game over!")
-
 
     
