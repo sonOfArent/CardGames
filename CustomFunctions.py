@@ -11,3 +11,14 @@ class CustomFunctions:
                 strings.append(element)
         
         return ints, strings
+   
+    @staticmethod
+    def Choice(choices, message): # Returns the choice made.
+        choice = None
+
+        while choice not in choices:
+            if choice is not None:
+                print("Please try again! ")
+            choice = input(f"{message}\n")
+
+        return choice

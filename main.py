@@ -1,5 +1,4 @@
 from Blackjack import BlackjackGame
-from Bots import *
 
 print("""
 

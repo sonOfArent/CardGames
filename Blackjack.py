@@ -11,16 +11,6 @@ class BlackjackGame():
     def PrintPlayerPosition(self, player): # Prints the player, the hand, and the value.
             print(f"{player}'s hand, {player.hand}, is worth {self.CheckHandValue(player.hand)}.\n")
 
-    def Choice(self, choices, message): # Returns the choice made.
-        choice = None
-
-        while choice not in choices:
-            if choice is not None:
-                print("Please try again! ")
-            choice = input(f"{message}\n")
-
-        return choice
-
     def CheckHandValue(self, hand): # Returns value of the hand.
         handValue = 0
         
@@ -115,7 +105,7 @@ class BlackjackRound():
         print(f"Player {player} folds with a hand value of {handValue}!")
 
     def TakeTurn(self, player):
-        choice = game.Choice(["h", "f"], "Would you like to (h)it or (f)old?")
+        choice = CustomFunctions.Choice(["h", "f"], "Would you like to (h)it or (f)old?")
 
         match choice:
             case "h":
@@ -128,11 +118,11 @@ class BlackjackRound():
 game = BlackjackGame()
 game.PlayRound()
 
-playAnother = game.Choice(["y", "n"], "Would you like to play another? type y or n.")
+playAnother = CustomFunctions.Choice(["y", "n"], "Would you like to play another? type y or n.")
 
 while playAnother == "y":
     game.PlayRound()
     game.PrintScores()
 
-    playAnother = game.Choice(["y", "n"], "Would you like to play another? type y or n.")
+    playAnother = CustomFunctions.Choice(["y", "n"], "Would you like to play another? type y or n.")
 
