@@ -8,7 +8,7 @@ class BlackjackGame():
     def __init__(self):
         self.deck = CardGame.CreateDeck()
         self.players = CardGame.Populate()
-        self.endPlayers = self.players
+        self.endPlayers = []
         self.scores = []
         for player in self.players:
             card = CardGame.TransferCard(self.deck, player.hand)
@@ -31,7 +31,7 @@ class BlackjackGame():
         # Take player out of loop, and record his score.
         CardGame.SwitchTurn(playerLst)
         playerLst.remove(player)
-        # endPlayerLst.append(player)
+        endPlayerLst.append(player)
         scoreLst.append(BlackjackGame.CheckHandValue(player.hand))
         print(f"Player {player.name} folded, with {BlackjackGame.CheckHandValue(player.hand)} hand score!")
 
@@ -114,6 +114,3 @@ print(f"""Game Ended, scores are as follows:
 {game.endPlayers[1]}: {game.scores[1]}!
 {game.endPlayers[2]}: {game.scores[2]}!
 """)
-
-# TODO: My Fold() method is no longer removing players from the game.player list. 
-# TODO: My current problem is trying to append the player to the endPlayerLst in the Fold() method. I don't know why, but I've run out of time on my break to figure it out.
