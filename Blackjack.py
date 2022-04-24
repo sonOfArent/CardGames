@@ -1,49 +1,34 @@
 from CardGame import CardGame
 from CustomFunctions import CustomFunctions
-from Player import Player
 
 class BlackjackGame():
-    # We need to add the different functions we'll need here, to play a game of BlackJack. This will include everything done that is unique to BlackJack.
-    
+    # Restructuring my code, I want to make this the overall object, and initialize new BlackjackRounds in order to play each round. This way, the data from each round is saved.
     def __init__(self):
         self.deck = CardGame.CreateDeck()
         self.players = CardGame.Populate()
-        self.endPlayers = []
-        self.scores = []
-        for player in self.players:
-            card = CardGame.TransferCard(self.deck, player.hand)
+        self.finishedRounds = [] # Holds the finished Round objects.
 
-    rules = """
-    So here's the way the game is played:
-        a) The dealer hands one card to each player.
-        b) Each player decides if they're going to hit (draw another card), or fold (stick with the hand value they have).
-        c) The closer they reach 21, the better their hand is, but if they go over, they bust (lose).
-        d) The player closest to 21 wins!
-    """
+    def PrintPlayerPosition(self, player): # Prints the player, the hand, and the value.
+            print(f"{player}'s hand, {player.hand}, is worth {self.CheckHandValue(player.hand)}.\n")
 
-    @staticmethod
-    def Hit(deck, hand):
-        card = CardGame.TransferCard(deck, hand)
-        print(card)
+    def Choice(self, choices, message): # Returns the choice made.
+        choice = None
 
-    @staticmethod
-    def Fold(player, playerLst, scoreLst, endPlayerLst):
-        # Take player out of loop, and record his score.
-        CardGame.SwitchTurn(playerLst)
-        playerLst.remove(player)
-        endPlayerLst.append(player)
-        scoreLst.append(BlackjackGame.CheckHandValue(player.hand))
-        print(f"Player {player.name} folded, with {BlackjackGame.CheckHandValue(player.hand)} hand score!")
+        while choice not in choices:
+            if choice is not None:
+                print("Please try again! ")
+            choice = input(f"{message}\n")
 
-    @staticmethod
-    def CheckHandValue(hand):
+        return choice
+
+    def CheckHandValue(self, hand): # Returns value of the hand.
         handValue = 0
-
-        values = [] # We want to pass in the values of the cards, not the card objects theselves.
+        
+        values = []
         for card in hand:
             values.append(card.value)
 
-        ints, strings = CustomFunctions.MixedSort(values)
+        ints, strings = CustomFunctions.MixedSort(values) 
 
         for i in ints:
             handValue += i
@@ -61,9 +46,8 @@ class BlackjackGame():
                 
         return handValue
 
-    @staticmethod
-    def HandState(hand):
-        handValue = BlackjackGame.CheckHandValue(hand)
+    def HandState(self, hand): # Just returns the hand value and the current player state.
+        handValue = self.CheckHandValue(hand)
         state = ""
 
         if handValue < 21:
@@ -73,61 +57,82 @@ class BlackjackGame():
         elif handValue > 21:
             state = "Bust!"
         
-        return state, handValue
-
-    @staticmethod
-    def Choice(player):
-        print(f"Your hand, {player.hand}, is worth {BlackjackGame.CheckHandValue(player.hand)}.\n")
+        return handValue, state
         
-        choice = None
-        while choice not in ["h", "f"]:
-            if choice is not None:
-                print("Please try again! ")
-            choice = input("Would you like to (h)it or (f)old?\n")
-        
-        return choice
+    def RoundFinish(self, round): # add the round to the finishedRounds list.
+        self.finishedRounds.append(round.scores)
 
-    @staticmethod
-    def TakeTurn(player, playerLst, deck, hand, scoreLst, endPlayerLst):
-        choice = BlackjackGame.Choice(player)
+    def PlayRound(self): # Play a full round.
+        # currentRound = None
+        currentRound = BlackjackRound()
+
+        while len(currentRound.roundPlayers) > 0:
+            currentPlayer = currentRound.roundPlayers[0]
+            currentRound.TakeTurn(currentPlayer)
+
+            if len(currentRound.roundPlayers) == 0: break
+
+            if len(currentRound.roundPlayers) > 1:
+                CardGame.SwitchTurn(currentRound.roundPlayers)
+            else:
+                print(f"{currentPlayer} is the last player still in!")
+
+        # print(f"The round scores are as follows:")
+        # for key, value in currentRound.scores.items():
+        #     print(key, value)
+
+        self.RoundFinish(currentRound)
+
+    def PrintScores(self): # Iterating through the dict of dicts to retrieve the scores.
+        currentRound = 0
+        for roundScore in self.finishedRounds:
+            currentRound += 1
+            for key, value in roundScore.items():
+                print(key, value, f"Round {currentRound}")
+        
+
+class BlackjackRound():
+
+    def __init__(self):
+        self.scores = {} # I can hold the player/scores in a dict instead of two separate lists.
+        self.roundPlayers = [] # TODO: Sync with Game's playerList. Need copy for own mutability.
+        for player in game.players:
+            self.roundPlayers.append(player)
+    
+    def __repr__(self):
+        return f"Round"
+
+    def Hit(self, hand, retrn = False): # Basically just draws, but called fancy. Can return if desired.
+        card = CardGame.TransferCard(game.deck, hand)
+        if retrn: return card
+
+    def Fold(self, player): # Shows player stats, and removes them from the roundPlayers list.
+        handValue = game.CheckHandValue(player.hand)
+        self.scores[player] = handValue
+
+        self.roundPlayers.remove(player)
+        
+        print(f"Player {player} folds with a hand value of {handValue}!")
+
+    def TakeTurn(self, player):
+        choice = game.Choice(["h", "f"], "Would you like to (h)it or (f)old?")
 
         match choice:
             case "h":
-                BlackjackGame.Hit(deck, hand)
-                state, handValue = BlackjackGame.HandState(hand)
-                print(state, handValue, hand)
-                return state, handValue
+                print(f"Player {player} has chosen to hit!")
+                self.Hit(player.hand)
             case "f":
-                BlackjackGame.Fold(player, playerLst, scoreLst, endPlayerLst)
-
+                print(f"Player {player} has chosen to fold!")
+                self.Fold(player)
 
 game = BlackjackGame()
-while len(game.players) > 0:
+game.PlayRound()
 
-    currentPlayer = game.players[0]
+playAnother = game.Choice(["y", "n"], "Would you like to play another? type y or n.")
 
-    state, handValue = game.TakeTurn(game.players[0], game.players, game.deck, game.players[0].hand, game.scores, game.endPlayers)
+while playAnother == "y":
+    game.PlayRound()
+    game.PrintScores()
 
-    print(state)
-    if handValue >= 21:
-        game.players.remove(currentPlayer)
-        game.endPlayers.append(currentPlayer)
-        game.scores.append(handValue)
-        print(f"It is now {game.players[0]}'s turn!")
-
-    elif handValue < 21:
-        if len(game.players) > 1:
-            CardGame.SwitchTurn(game.players)
-        else:
-            print("Turn kept, last player in!")
-
-print(f"""Game Ended, scores are as follows:
-{game.endPlayers[0]}: {game.scores[0]}!
-{game.endPlayers[1]}: {game.scores[1]}!
-{game.endPlayers[2]}: {game.scores[2]}!
-""")
-
-# TODO: So before I attempt to switch the turns, I need to check for if there are any players left in the game.
-# TODO: I need to reconfigure the file because I need to have both a BlackjackRound and a BlackjackGame function. I need to configure it because there are several rounds in a game, and the way I have it set up right now, it reinitializes everything at file startup. This wouldn't be too bad an issue, except for the fact that I'd like to do several things, such as implement a database system for player stats and also play several rounds with the same deck.
-# TODO: In the while loop, hand and value don't have values when a player folds. Instead of fixing this like I should, I'm going to rewrite a bunch of this code to fix it and reroute everything.
+    playAnother = game.Choice(["y", "n"], "Would you like to play another? type y or n.")
 
