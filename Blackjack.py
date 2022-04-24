@@ -95,7 +95,8 @@ class BlackjackGame():
             case "h":
                 BlackjackGame.Hit(deck, hand)
                 state, handValue = BlackjackGame.HandState(hand)
-                print(state, handValue, deck, hand)
+                print(state, handValue, hand)
+                return state, handValue
             case "f":
                 BlackjackGame.Fold(player, playerLst, scoreLst, endPlayerLst)
 
@@ -103,14 +104,30 @@ class BlackjackGame():
 game = BlackjackGame()
 while len(game.players) > 0:
 
-    try:
-        game.TakeTurn(game.players[0], game.players, game.deck, game.players[0].hand, game.scores, game.endPlayers)
-    except:
-        break
-    CardGame.SwitchTurn(game.players)
+    currentPlayer = game.players[0]
+
+    state, handValue = game.TakeTurn(game.players[0], game.players, game.deck, game.players[0].hand, game.scores, game.endPlayers)
+
+    print(state)
+    if handValue >= 21:
+        game.players.remove(currentPlayer)
+        game.endPlayers.append(currentPlayer)
+        game.scores.append(handValue)
+        print(f"It is now {game.players[0]}'s turn!")
+
+    elif handValue < 21:
+        if len(game.players) > 1:
+            CardGame.SwitchTurn(game.players)
+        else:
+            print("Turn kept, last player in!")
 
 print(f"""Game Ended, scores are as follows:
 {game.endPlayers[0]}: {game.scores[0]}!
 {game.endPlayers[1]}: {game.scores[1]}!
 {game.endPlayers[2]}: {game.scores[2]}!
 """)
+
+# TODO: So before I attempt to switch the turns, I need to check for if there are any players left in the game.
+# TODO: I need to reconfigure the file because I need to have both a BlackjackRound and a BlackjackGame function. I need to configure it because there are several rounds in a game, and the way I have it set up right now, it reinitializes everything at file startup. This wouldn't be too bad an issue, except for the fact that I'd like to do several things, such as implement a database system for player stats and also play several rounds with the same deck.
+# TODO: In the while loop, hand and value don't have values when a player folds. Instead of fixing this like I should, I'm going to rewrite a bunch of this code to fix it and reroute everything.
+
