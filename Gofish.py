@@ -7,6 +7,11 @@ class GoFish():
     def __init__(self):
         self.deck = CardGame.CreateDeck()
         self.players = CardGame.Populate()
+        self.pairs = {}
+
+        for player in self.players:
+            self.pairs[player] = []
+            print(f"Player {player}'s pairs: {self.pairs[player]}")
 
     def CardChoice(self, player): # Returns chosen card out of the hand.
         for num in range(len(player.hand)):
@@ -29,22 +34,35 @@ class GoFish():
 
         inp = CustomFunctions.Choice([str(num) for num in range(1, len(otherPlayers) + 1)], f"Which player would you like to ask about the {card}?")
 
-        return otherPlayers[int(inp) - 1]
+        playerChoice = otherPlayers[int(inp) - 1]
+        return playerChoice
         
     def CheckForMatch(self, otherPlayer, card): # I need to check the value of each card in the other player's hand, and see if it matches a card in the otherPlayer's hand.
 
         for otherCard in otherPlayer.hand:
             if card.value == otherCard.value:
-                return True
+                return otherCard
         
         return False
 
-    def TakeTurn(self, currentPlayer):
+    def TakeTurn(self):
+        currentPlayer = self.players[0]
         cardChoice = self.CardChoice(currentPlayer)
         playerChoice = self.PlayerChoice(currentPlayer, cardChoice)
-        match = self.CheckForMatch(playerChoice, cardChoice)
+        matched = self.CheckForMatch(playerChoice, cardChoice)
 
-        print(match, cardChoice)
+        if type(matched) == Card:
+            pair = []
+
+            CardGame.TransferCard(currentPlayer.hand, pair, cardChoice)
+            CardGame.TransferCard(playerChoice.hand, pair, matched)
+            self.pairs[currentPlayer].append(pair)
+
+        else:
+            print("Go Fish!")
+            CardGame.TransferCard(self.deck, currentPlayer.hand)
+
+        print(currentPlayer.hand, self.pairs[currentPlayer])
 
 game = GoFish()
 
@@ -54,10 +72,8 @@ for num in range(7):
     CardGame.TransferCard(game.deck, currentPlayer.hand)
     CardGame.TransferCard(game.deck, game.players[1].hand)
 
-game.TakeTurn(currentPlayer)
+while True:
+    game.TakeTurn()
+    CardGame.SwitchTurn(game.players)
 
-
-
-
-
-
+# TODO: If any hand size is 0, the game is over and that player wins.
