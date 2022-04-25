@@ -1,12 +1,12 @@
 from Card import Card
 from CardGame import CardGame
 from CustomFunctions import CustomFunctions
-from Player import Player
 
 class GoFish():
     def __init__(self):
         self.deck = CardGame.CreateDeck()
         self.players = CardGame.Populate()
+        self.playersWon = []
         self.pairs = {}
 
         for player in self.players:
@@ -64,16 +64,33 @@ class GoFish():
 
         print(currentPlayer.hand, self.pairs[currentPlayer])
 
+    def PlayGame(self):
+
+        for num in range(7):
+            for player in self.players:
+                CardGame.TransferCard(self.deck, player.hand)
+
+        gameOver = False
+
+        while gameOver is False:
+
+            self.TakeTurn()
+
+            for player in self.players:
+                if len(player.hand) == 0:
+                    print(f"{player}'s hand is empty!")
+                    self.playersWon.append(player)
+                    gameOver = True
+
+        CardGame.SwitchTurn(self.players)
+        print(f"It is now {self.players[0]}'s turn!")
+
+
 game = GoFish()
 
-currentPlayer = game.players[0]
+game.PlayGame()
 
-for num in range(7):
-    CardGame.TransferCard(game.deck, currentPlayer.hand)
-    CardGame.TransferCard(game.deck, game.players[1].hand)
 
-while True:
-    game.TakeTurn()
-    CardGame.SwitchTurn(game.players)
+
 
 # TODO: If any hand size is 0, the game is over and that player wins.
