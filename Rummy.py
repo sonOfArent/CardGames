@@ -2,24 +2,90 @@ from CardGame import CardGame
 from Player import Player
 from CustomFunctions import CustomFunctions
 
-
-# This is a complicated card game to recreate, as the game involves many separate groups of cards co-existing in many different ways. However, it shouldn't be too much more difficult than, say, Blackjack, it'll just take a bit longer to figure some things out.
-
 class RummyGame():
 
-    def CheckifValid(self, card, lstToCheckAgainst): # Check if the card you're wanting to add is valid to add.
-        if len(lstToCheckAgainst) < 3:
-           
-            # If it's not being played off of someone else...
-            return False
+    def __init__(self):
 
+        self.deck = CardGame.CreateDeck("rummy")
+        self.players = CardGame.Populate()
+        self.discardLine = []
+        self.runsAndBooks = []
 
-
-
-# DONE: Already I can see an issue where if another player played some cards off of someone else, I'd have to ensure that my function can understand that. ######
-# TODO: Scratch that above, I already know a way to fix that. I don't actually have to have the cards pointing back to where they were played, just that the points are registered for the person playing them.
-# TODO: I can instead have all the cards migrating to the same static playedLists and figure it out from there!
-
-# TODO: I can do it this way: I have the player input the list of cards they want to play and the player they want to play them off of. It then checks each of these cards against each of the chosen player's groups, and returns all the groups that the cards can be played off of. 
+    def CheckCardsForValidPlays(self, cardsToCheck, listOfLists): # Checking for every run that the chosen cards could be applied to.
         
-# TODO: Potentially, I can have the card(s) in question go through two functions: CheckForDuplicateGroup() and CheckForLineGroup(). In each, I have the card(s) go through the similar steps: for each card, if the card matches up with any of the groups, I return each group it matches up with. Then, if the  
+        cardsToCheckCopy = [card for card in cardsToCheck]
+
+        validRuns = []
+
+        for lst in listOfLists:
+            cardMash = []
+            
+            # Add the cards to the cardMash.
+            for card in lst:
+                cardMash.append(card)
+            for card in cardsToCheckCopy:
+                cardMash.append(card)
+
+            # Sort it all.
+            cardMash.sort()
+
+            if cardMash[0].value == cardMash[-1].value:
+                type = "book"
+            else:
+                type = "run"
+
+
+            lstIsValid = True
+
+            if type == "run":
+
+                for num in range(len(cardMash)):
+
+                    if num == 0:
+                        continue
+
+                    if cardMash[num].value - 1 != cardMash[num - 1].value:
+                        lstIsValid = False
+
+            elif type == "book":
+
+                if cardMash[0].value != cardMash[1].value:
+                    lstIsValid = False
+
+            if lstIsValid:
+                validRuns.append(lst)
+            
+        return validRuns
+
+    def ChooseCards(self, player):
+        cardsChosen = []
+
+        keepAddingCards = True
+
+        while keepAddingCards == True:
+            inp = CustomFunctions.Choice(player.hand, f"Which card would you like to add to the 'to play' list, {player}?")
+
+            CardGame.TransferCard(player.hand, cardsChosen, player.hand[int(inp) + 1])
+
+            inp = CustomFunctions.Choice(['y', 'n'], "Would you like to add another card?")
+
+            if inp == 'n':
+                keepAddingCards = False
+
+            # TODO: Change the numbers in CheckCardForValidPlays to actual cards and their values.
+
+
+rummy = RummyGame()
+
+listOfLists = [[8, 8, 8], [1, 2, 3], [5, 6, 7]]
+checks = [[4, 5], [4], [8], [1, 4, 5]]
+
+for toCheck in checks:
+    plays = rummy.CheckCardsForValidPlays(toCheck, listOfLists)
+    if len(plays) > 1:
+        plural = "lists"
+    else:
+        plural = "list"
+
+    print(f"The check {toCheck} fits into the {plural} {plays}.")
+
