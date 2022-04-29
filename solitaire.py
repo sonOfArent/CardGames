@@ -16,9 +16,14 @@ class Solitaire:
 
             self.listOfColumns.append(listToAppend)
 
+        # TODO: Put the rest of the card deck into the stack. Deck was really just a placeholder. 
+
 game = Solitaire()
 
 game.InitializeBoard()
 
 for lst in game.listOfColumns:
-    print(f"{len(lst) - 1} hidden cards, {lst[-1]}")
+    plural = ""
+    if lst != game.listOfColumns[1]:
+        plural = "s"
+    print(f"{len(lst) - 1} hidden card{plural}, {lst[-1]}")
