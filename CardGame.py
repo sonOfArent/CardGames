@@ -16,19 +16,19 @@ class CardGame(Card):
     @staticmethod
     def CreateDeck(type = None):
 
-        values = [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"]
+        values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
         suits = ["Hearts", "Clubs", "Diamonds", "Spades"]
 
-        match type:
-            case "rummy":
-                values = [num for num in range(1, 14)]
+        if type == "rummy":
+            values = [num for num in range(1, 14)]
+        elif type == "solitaire":
+            suits = ["Red", "Black", "Red", "Black"]
 
         deck = []
 
         for suit in suits:
             for value in values:
                 deck.append(Card(suit, value))
-        
 
 
         random.shuffle(deck)
